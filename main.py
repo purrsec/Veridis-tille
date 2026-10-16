@@ -1,5 +1,5 @@
 def main():
-    print("Hello from veridis-topik!")
+    print("Hello from Veridis-tille!")
 
 
 if __name__ == "__main__":
