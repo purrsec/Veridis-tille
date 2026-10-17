@@ -19,6 +19,14 @@ CSV_FIELDS = ["track_1", "track_2", "is_plagiarism"]
 FILENAME_PATTERN = re.compile(
     r"^[a-z0-9]+(?:-[a-z0-9]+)*-(?:original|AI-[A-Za-z0-9]+)\.wav$"
 )
+STEM_NAMES = ("vocals", "drums", "bass", "piano", "other")
+NOTE_EVENT_FIELDS = [
+    "start_time_s",
+    "end_time_s",
+    "pitch_midi",
+    "velocity",
+    "pitch_bend",
+]
 
 
 def decoded_sha256(path: Path) -> str:
@@ -86,8 +94,7 @@ def validate_audio(errors: list[str]) -> list[Path]:
     hashes: dict[str, Path] = {}
 
     for path in entries:
-        if not path.is_file():
-            errors.append(f"dataset must be flat; found directory: {path.name}")
+        if path.is_dir():
             continue
         if not FILENAME_PATTERN.fullmatch(path.name):
             errors.append(f"invalid dataset filename: {path.name}")
@@ -142,6 +149,84 @@ def validate_audio(errors: list[str]) -> list[Path]:
             hashes[digest] = path
 
     return audio_files
+
+
+def validate_analysis_directories(audio_files: list[Path], errors: list[str]) -> None:
+    source_by_stem = {path.stem: path for path in audio_files}
+    directories = sorted(path for path in DATASET_DIR.iterdir() if path.is_dir())
+    directory_names = {path.name for path in directories}
+
+    for source_stem in sorted(source_by_stem.keys() - directory_names):
+        errors.append(f"missing analysis directory for {source_stem}.wav")
+
+    for directory in directories:
+        if directory.name not in source_by_stem:
+            errors.append(
+                f"analysis directory has no matching source WAV: {directory.name}"
+            )
+            continue
+
+        expected = {
+            directory / f"{stem}.wav" for stem in STEM_NAMES
+        } | {
+            directory / f"{stem}_basic_pitch.{extension}"
+            for stem in STEM_NAMES
+            for extension in ("mid", "csv")
+        }
+        entries = set(directory.iterdir())
+        for path in sorted(expected - entries):
+            errors.append(f"{directory.name}: missing analysis file {path.name}")
+        for path in sorted(entries - expected):
+            errors.append(f"{directory.name}: unexpected analysis file {path.name}")
+        for path in entries:
+            if path.is_dir():
+                errors.append(
+                    f"{directory.name}: nested directory is not allowed: {path.name}"
+                )
+            elif path.stat().st_size == 0:
+                errors.append(f"{directory.name}: empty analysis file {path.name}")
+
+        for stem in STEM_NAMES:
+            stem_path = directory / f"{stem}.wav"
+            if not stem_path.is_file():
+                continue
+            try:
+                details = probe(stem_path)
+            except (RuntimeError, json.JSONDecodeError) as error:
+                errors.append(str(error))
+                continue
+            streams = details.get("streams", [])
+            if len(streams) != 1 or streams[0].get("codec_type") != "audio":
+                errors.append(f"{directory.name}/{stem_path.name}: expected one audio stream")
+                continue
+            stream = streams[0]
+            for field, value in {
+                "codec_name": "pcm_s16le",
+                "sample_rate": "44100",
+                "channels": 2,
+            }.items():
+                if stream.get(field) != value:
+                    errors.append(
+                        f"{directory.name}/{stem_path.name}: expected {field}={value}, "
+                        f"got {stream.get(field)}"
+                    )
+
+            midi_path = directory / f"{stem}_basic_pitch.mid"
+            if midi_path.is_file():
+                with midi_path.open("rb") as stream:
+                    if stream.read(4) != b"MThd":
+                        errors.append(
+                            f"{directory.name}/{midi_path.name}: invalid MIDI header"
+                        )
+
+            notes_path = directory / f"{stem}_basic_pitch.csv"
+            if notes_path.is_file():
+                with notes_path.open(newline="", encoding="utf-8") as stream:
+                    reader = csv.reader(stream)
+                    if next(reader, None) != NOTE_EVENT_FIELDS:
+                        errors.append(
+                            f"{directory.name}/{notes_path.name}: invalid note CSV header"
+                        )
 
 
 def validate_splits(audio_files: list[Path], errors: list[str]) -> None:
@@ -203,6 +288,7 @@ def validate_splits(audio_files: list[Path], errors: list[str]) -> None:
 def main() -> int:
     errors: list[str] = []
     audio_files = validate_audio(errors)
+    validate_analysis_directories(audio_files, errors)
     validate_splits(audio_files, errors)
 
     if errors:
@@ -212,7 +298,8 @@ def main() -> int:
         return 1
 
     print(
-        f"Validated {len(audio_files)} audio files and "
+        f"Validated {len(audio_files)} source files, "
+        f"{len(audio_files) * len(STEM_NAMES)} stems, and "
         f"{len(SPLIT_NAMES)} split CSV files."
     )
     return 0
