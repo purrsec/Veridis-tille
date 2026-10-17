@@ -33,3 +33,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Local experiments and generated audio
+/sandbox/

@@ -1,6 +1,5 @@
-def main():
-    print("Hello from Veridis-tille!")
+from veridis_tille.cli import main
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
