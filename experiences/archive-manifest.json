@@ -1,0 +1,240 @@
+{
+  "note": "Original SHA-256 values before relocation and path/import updates. Numerical CSV files are preserved byte for byte.",
+  "files": [
+    {
+      "original_path": "docs/experiments/basic-pitch-bass.md",
+      "archive_path": "experiences/01/rapport.md",
+      "original_sha256": "d62c0b8ddf359e1e4513547e1e6f7c6240cd36befbf1162f7d44cc51a462b5b1"
+    },
+    {
+      "original_path": "docs/experiments/vectorization-baseline.md",
+      "archive_path": "experiences/02/rapport.md",
+      "original_sha256": "a0f123b11337a5dbba73f7721114c74a73bd34f071b2dcaac63c991ce2d67c34"
+    },
+    {
+      "original_path": "scripts/run_similarity_baseline.py",
+      "archive_path": "experiences/02/run.py",
+      "original_sha256": "29f0e0220ee24d60cdf2e2def973d29925f48a64b8306fa9dc42b499ac6b2f9c"
+    },
+    {
+      "original_path": "output/research/similarity-baseline.csv",
+      "archive_path": "experiences/02/similarity-baseline.csv",
+      "original_sha256": "004308f02aec774ba62128d3819aea4ba34d4dd4f4772bc68064a33cde1fd51c"
+    },
+    {
+      "original_path": "docs/experiments/midi-velocity-experiment.md",
+      "archive_path": "experiences/03/rapport.md",
+      "original_sha256": "2d4d9332eff6af81d98705581fa06a0cd43c556a0bccf2858383c7743d6e5c12"
+    },
+    {
+      "original_path": "scripts/run_midi_velocity_experiment.py",
+      "archive_path": "experiences/03/run.py",
+      "original_sha256": "b401e991f2e09d85ada4399903e9907cf7b25b270b09d749d1cdbbaf956e13e9"
+    },
+    {
+      "original_path": "output/research/midi-velocity-experiment.csv",
+      "archive_path": "experiences/03/midi-velocity-experiment.csv",
+      "original_sha256": "ca136f83fe7165aca5629900cbf8349f5670c7129727627157ddb15d05f500f9"
+    },
+    {
+      "original_path": "docs/experiments/midi-activity-experiment.md",
+      "archive_path": "experiences/04/rapport.md",
+      "original_sha256": "c1e3fa7596147aeada0983937506a0c71997c40393be0cb961e5ff3f75c7229f"
+    },
+    {
+      "original_path": "scripts/run_midi_activity_experiment.py",
+      "archive_path": "experiences/04/run.py",
+      "original_sha256": "36f9f3c4de61ba82ca9078b929c4b1676a7551d07731cf57fe2cd88ada19e070"
+    },
+    {
+      "original_path": "output/research/midi-activity-experiment.csv",
+      "archive_path": "experiences/04/midi-activity-experiment.csv",
+      "original_sha256": "645a6a0db55f882ac88de10b6bdf1f8f7395b7c52a7e558f6073efea3a5479af"
+    },
+    {
+      "original_path": "docs/experiments/melodic-contour-experiment.md",
+      "archive_path": "experiences/05/rapport.md",
+      "original_sha256": "2434460cc51d42113048bc14386e4d37ddd7186fcd6ccef8f560979d98557b4e"
+    },
+    {
+      "original_path": "scripts/run_melodic_contour_experiment.py",
+      "archive_path": "experiences/05/run.py",
+      "original_sha256": "1c9ee092ec86c5e2d7233943028dc5083b6bb87d40d4bf2061d399fc9ee2f35b"
+    },
+    {
+      "original_path": "output/research/melodic-contour-experiment.csv",
+      "archive_path": "experiences/05/melodic-contour-experiment.csv",
+      "original_sha256": "b2a1efb70c7a8fad2d048629b66e2b8d58c754270e05b747c6bafc11c198bf5d"
+    },
+    {
+      "original_path": "docs/experiments/multistem-fusion-experiment.md",
+      "archive_path": "experiences/06/rapport.md",
+      "original_sha256": "91ae0fb1a71202a1f3961707da839eff86a8bf3a4fe668e05cf9b7d5abb3e278"
+    },
+    {
+      "original_path": "scripts/run_multistem_fusion_experiment.py",
+      "archive_path": "experiences/06/run.py",
+      "original_sha256": "c265714b8658f39309e78fa1641f654b4912f16548d9b21a9ebf3ffcd928d096"
+    },
+    {
+      "original_path": "output/research/multistem-fusion-experiment.csv",
+      "archive_path": "experiences/06/multistem-fusion-experiment.csv",
+      "original_sha256": "4eac0cb3152919dd2b0e02c1965fadacdcc95a9f5dfd90bd1b5ff38a98be9220"
+    },
+    {
+      "original_path": "docs/experiments/sequence-alignment-experiment.md",
+      "archive_path": "experiences/07/rapport.md",
+      "original_sha256": "70a2e19f12081b56e6224e834b0aa98aeb46cc99ba2c3ba896ce9f21b4d944d3"
+    },
+    {
+      "original_path": "scripts/run_sequence_alignment_experiment.py",
+      "archive_path": "experiences/07/run.py",
+      "original_sha256": "604c81f027a258ec93fa9d6979b9a81de2cc74a871ef76ca02d7131514fc34be"
+    },
+    {
+      "original_path": "output/research/sequence-alignment-experiment.csv",
+      "archive_path": "experiences/07/sequence-alignment-experiment.csv",
+      "original_sha256": "988bc51b7b58cf2173df519e94f9b1b15a9a899add4eace505615a22599fddaa"
+    },
+    {
+      "original_path": "docs/experiments/full-mix-chroma-experiment.md",
+      "archive_path": "experiences/08/rapport.md",
+      "original_sha256": "e249f67ca874b8e67b9a129437be3d71e769a6cbd4b8e96e3a7a1c99d91e048d"
+    },
+    {
+      "original_path": "scripts/run_full_mix_chroma_experiment.py",
+      "archive_path": "experiences/08/run.py",
+      "original_sha256": "2be3861db76e72c47e68536af0a03aacbc915ff4495163a1a40b9ab63cdb4653"
+    },
+    {
+      "original_path": "output/research/full-mix-chroma-experiment.csv",
+      "archive_path": "experiences/08/full-mix-chroma-experiment.csv",
+      "original_sha256": "f4c0ab2707815c15bf7f429b7177a50d8aa4e9d606e9ba5079ce670d2e287924"
+    },
+    {
+      "original_path": "docs/experiments/stem-chroma-ablation.md",
+      "archive_path": "experiences/09/rapport.md",
+      "original_sha256": "ab8bca32ac8aaf848c4e205bc8d043bbb090ec42e407808590bd3159e8381290"
+    },
+    {
+      "original_path": "scripts/run_stem_chroma_ablation.py",
+      "archive_path": "experiences/09/run.py",
+      "original_sha256": "0d38aa7f809cf42bd9c8a6ede7ad77343d55f0a0790ab3d138d751d229622ed9"
+    },
+    {
+      "original_path": "output/research/stem-chroma-ablation.csv",
+      "archive_path": "experiences/09/stem-chroma-ablation.csv",
+      "original_sha256": "46bdacf62d4b9fb8b59ef0fea5224aabb8bdf78d8c0ba5cc17af2ef0d0e670c6"
+    },
+    {
+      "original_path": "docs/experiments/pitch-representation-ablation.md",
+      "archive_path": "experiences/10/rapport.md",
+      "original_sha256": "49d22802b25404df7c714ad77ffd29873bd056db8bc879ae0c326186438b8d6a"
+    },
+    {
+      "original_path": "docs/experiments/pitch-transformation-robustness.md",
+      "archive_path": "experiences/12/rapport.md",
+      "original_sha256": "c3a6602535032461c4a15b942af0a86127e5e3ed0554fa88c2ab8de9c9327f82"
+    },
+    {
+      "original_path": "docs/experiments/pitch-ablation-protocol.md",
+      "archive_path": "experiences/10/protocole.md",
+      "original_sha256": "62842c60e1d3d87143f0c572d21019afba483ce5e120f61ad31996be0ecc2469"
+    },
+    {
+      "original_path": "scripts/run_pitch_ablation_experiments.py",
+      "archive_path": "experiences/_shared/pitch_ablation.py",
+      "original_sha256": "bd5b2543d163110d4c862835037fc68afa47904ccaa4b3d9bda6a79f0f1e7850"
+    },
+    {
+      "original_path": "scripts/plot_pitch_experiments.py",
+      "archive_path": "experiences/_shared/plot_pitch.py",
+      "original_sha256": "d4a47ae2e315d1b9b930451610fe956849b31a167c23f86bcec04a60ed61c791"
+    },
+    {
+      "original_path": "output/pdf/drum-similarity-research.pdf",
+      "archive_path": "experiences/02/drum-similarity-research.pdf",
+      "original_sha256": "fe08aca3ee27a34bf3b9a1306432d9c0b653d673c149b7aa49c5899d3588a88e"
+    },
+    {
+      "original_path": "output/research/pitch-robustness-manifest.csv",
+      "archive_path": "experiences/12/pitch-robustness-manifest.csv",
+      "original_sha256": "9558fba82221a6e64bf92657bdc99605e8cc873282f6ccb1fc3545900c99d284"
+    },
+    {
+      "original_path": "output/research/pitch-experiments-environment.json",
+      "archive_path": "experiences/10/pitch-experiments-environment.json",
+      "original_sha256": "e30909e0c1007062bb174313b13ec2b159266092a540afa5eb94175f9d51a45e"
+    },
+    {
+      "original_path": "output/research/pitch-spleeter-stream-check.json",
+      "archive_path": "experiences/12/pitch-spleeter-stream-check.json",
+      "original_sha256": "d2c3e6c327233e4736185ac4cd21b5eefb84a61bb8fa00ebe88ed2b9bf266d09"
+    },
+    {
+      "original_path": "output/research/pitch-ablation-scores.csv",
+      "archive_path": "experiences/10/pitch-ablation-scores.csv",
+      "original_sha256": "3f9b754f242df479b6efd38a69aff1ae6a9916d098350a3079acfe5191b080ce"
+    },
+    {
+      "original_path": "output/research/pitch-ablation-decisions.csv",
+      "archive_path": "experiences/10/pitch-ablation-decisions.csv",
+      "original_sha256": "87240f0393a1b3e8f9e0f1691a8e72b148e6c1778822ee8c90e0c38ec5120b2d"
+    },
+    {
+      "original_path": "output/research/pitch-basic-pitch-inference-check.json",
+      "archive_path": "experiences/10/pitch-basic-pitch-inference-check.json",
+      "original_sha256": "b097fd2b51bd068aa8381e69819462acfa5031137be5c3511c9a39d384f0241b"
+    },
+    {
+      "original_path": "output/research/pitch-robustness-scores.csv",
+      "archive_path": "experiences/12/pitch-robustness-scores.csv",
+      "original_sha256": "baa0e8e4dbff0ff513120783db5d4b401edb12ba14190e2ff8f09404d47f458c"
+    },
+    {
+      "original_path": "output/research/pitch-representation-ablation.svg",
+      "archive_path": "experiences/10/pitch-representation-ablation.svg",
+      "original_sha256": "cfd6c99660c55fbd16c417e2fc53d2cc9039f5ffa5319aba7b7cc8513453d2fe"
+    },
+    {
+      "original_path": "output/research/pitch-representation-ablation.png",
+      "archive_path": "experiences/10/pitch-representation-ablation.png",
+      "original_sha256": "ebedfc4eb6c630d43150e527f26448be23b019784fa826c202d6da6ff0f8f511"
+    },
+    {
+      "original_path": "output/research/pitch-robustness-calibration-audit.csv",
+      "archive_path": "experiences/12/pitch-robustness-calibration-audit.csv",
+      "original_sha256": "85deec708e980b7fea1a25f1f58c141f132cc42f83129682306fc26996cff112"
+    },
+    {
+      "original_path": "output/research/pitch-robustness-decisions.csv",
+      "archive_path": "experiences/12/pitch-robustness-decisions.csv",
+      "original_sha256": "e58d0cd99b5a61f1291d7bb96efaa24bd3fe3f6d903f9bfc362ef24abd643824"
+    },
+    {
+      "original_path": "output/research/pitch-robustness-summary.csv",
+      "archive_path": "experiences/12/pitch-robustness-summary.csv",
+      "original_sha256": "aba61c6ad1190061dffe4c4764ba2f1b01a3c242c786d547c7db12808e412f38"
+    },
+    {
+      "original_path": "output/research/pitch-transformation-robustness.svg",
+      "archive_path": "experiences/12/pitch-transformation-robustness.svg",
+      "original_sha256": "e068203937ea8882c7e90be6259b745aec649749825cb1b143d35bf39160f99f"
+    },
+    {
+      "original_path": "output/research/pitch-transformation-robustness.png",
+      "archive_path": "experiences/12/pitch-transformation-robustness.png",
+      "original_sha256": "f5d048f639666bff5dc703c8336b9fec99ecca012c30c53b52ac83ceaa69e1f0"
+    },
+    {
+      "original_path": "tests/test_drum_similarity.py",
+      "archive_path": "experiences/02/test_drums.py",
+      "original_sha256": "7f90e03fc3e7a092faee2aff53c4560cb060c9ace5ff0171880ed786bc44fe07"
+    },
+    {
+      "original_path": "tests/test_pitch_features.py",
+      "archive_path": "experiences/10/test_features.py",
+      "original_sha256": "6eddd7438fb26451716572ec41f3279fdac1ef1116ec19a994893998a178efa9"
+    }
+  ]
+}

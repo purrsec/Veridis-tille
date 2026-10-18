@@ -13,3 +13,4 @@
 - [Sonic Visualiser](https://www.sonicvisualiser.org/)
 - [Spotify Basic Pitch](https://github.com/spotify/basic-pitch), Benjie Genchel and Spotify
 - [Deezer Spleeter](https://github.com/deezer/spleeter), Romain Hennequin and Deezer
+- [Rubber Band](https://breakfastquay.com/rubberband/), Chris Cannam and Particular Programs — controlled pitch and tempo transformations through FFmpeg

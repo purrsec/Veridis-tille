@@ -71,37 +71,6 @@ def test_build_window_vectors_contains_sustain_and_onset_channels() -> None:
     assert windows.values[0, 2, 1, 4] == 0.5  # E onset
 
 
-def test_build_window_vectors_supports_velocity_ablation() -> None:
-    events = [NoteEvent(start=0.0, end=1.0, pitch=60, velocity=0.25)]
-
-    linear = build_window_vectors(
-        events,
-        duration=2.0,
-        window_seconds=2.0,
-        hop_seconds=1.0,
-        frame_seconds=0.5,
-        velocity_mode="linear",
-    )
-    binary = build_window_vectors(
-        events,
-        duration=2.0,
-        window_seconds=2.0,
-        hop_seconds=1.0,
-        frame_seconds=0.5,
-        velocity_mode="binary",
-    )
-    square_root = build_window_vectors(
-        events,
-        duration=2.0,
-        window_seconds=2.0,
-        hop_seconds=1.0,
-        frame_seconds=0.5,
-        velocity_mode="sqrt",
-    )
-
-    assert linear.values[0, 0, 1, 0] == pytest.approx(0.25)
-    assert binary.values[0, 0, 1, 0] == pytest.approx(1.0)
-    assert square_root.values[0, 0, 1, 0] == pytest.approx(0.5)
 
 
 def test_similarity_matrix_recovers_pitch_transposition() -> None:
@@ -120,58 +89,8 @@ def test_similarity_matrix_recovers_pitch_transposition() -> None:
     assert set(np.diag(transpositions)) == {5}
 
 
-def test_similarity_matrix_can_reject_sparse_windows() -> None:
-    query = build_window_vectors(
-        motif(),
-        duration=12.0,
-        window_seconds=12.0,
-        hop_seconds=2.0,
-        frame_seconds=0.5,
-    )
-    sparse_reference = build_window_vectors(
-        motif(transpose=5)[:2],
-        duration=12.0,
-        window_seconds=12.0,
-        hop_seconds=2.0,
-        frame_seconds=0.5,
-    )
-
-    baseline, _ = compute_similarity_matrix(query, sparse_reference)
-    filtered, _ = compute_similarity_matrix(
-        query,
-        sparse_reference,
-        minimum_window_onsets=3,
-    )
-
-    assert baseline[0, 0] > 0
-    assert filtered[0, 0] == 0
 
 
-def test_activity_confidence_penalizes_unequal_note_density() -> None:
-    query = build_window_vectors(
-        motif(),
-        duration=12.0,
-        window_seconds=12.0,
-        hop_seconds=2.0,
-        frame_seconds=0.5,
-    )
-    sparse_reference = build_window_vectors(
-        motif(transpose=5)[:4],
-        duration=12.0,
-        window_seconds=12.0,
-        hop_seconds=2.0,
-        frame_seconds=0.5,
-    )
-
-    baseline, _ = compute_similarity_matrix(query, sparse_reference)
-    weighted, _ = compute_similarity_matrix(
-        query,
-        sparse_reference,
-        activity_target_onsets=8,
-        activity_weight=0.5,
-    )
-
-    assert 0 < weighted[0, 0] < baseline[0, 0]
 
 
 def test_compare_events_finds_copied_passage_and_ignores_one_artifact() -> None:

@@ -1,0 +1,9 @@
+{
+  "query": "big-in-japan-alphaville-AI-GEMA",
+  "max_absolute_error": {
+    "note": 0.0,
+    "onset": 0.0
+  },
+  "relative_tolerance": 0.0002,
+  "absolute_tolerance": 0.0001
+}

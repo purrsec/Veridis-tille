@@ -7,7 +7,7 @@ from .midi_similarity import (
     SimilarityConfig,
     compare_midi,
 )
-from .drum_similarity import DrumComparisonResult, DrumMatch, DrumSimilarityConfig, compare_drum_audio
+from .pipeline import Calibration, PairComparison, compare_tracks
 
 __all__ = [
     "ComparisonResult",
@@ -15,8 +15,7 @@ __all__ = [
     "NoteEvent",
     "SimilarityConfig",
     "compare_midi",
-    "DrumComparisonResult",
-    "DrumMatch",
-    "DrumSimilarityConfig",
-    "compare_drum_audio",
+    "Calibration",
+    "PairComparison",
+    "compare_tracks",
 ]

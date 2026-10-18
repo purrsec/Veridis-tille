@@ -1,0 +1,18 @@
+{
+  "name": "poc-eight-families",
+  "midi_threshold": 0.63156116,
+  "chroma_threshold": 0.981627693,
+  "source_experiment": "08",
+  "fitting_families": [
+    "big-in-japan-alphaville",
+    "brother-louie-modern-talking",
+    "cheri-cheri-lady-modern-talking",
+    "daddy-cool-boney-m",
+    "forever-young-alphaville",
+    "mambo-no-5-lou-bega",
+    "rasputin-boney-m",
+    "youre-my-heart-youre-my-soul-modern-talking"
+  ],
+  "fitting_pairs": 64,
+  "scope": "Development calibration on the complete POC corpus. This is not an independent test; the 0.847 F1 refers to fold-specific calibration, not this fixed profile."
+}
