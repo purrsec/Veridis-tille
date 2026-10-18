@@ -11,11 +11,14 @@ from __future__ import annotations
 from collections import Counter, defaultdict, deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Literal
 
 import mido
 import numpy as np
 from numpy.typing import NDArray
+
+
+VelocityMode = Literal["linear", "binary", "sqrt"]
 
 
 @dataclass(frozen=True)
@@ -49,6 +52,10 @@ class SimilarityConfig:
     minimum_match_seconds: float = 10.0
     max_matches: int = 5
     tempo_ratios: tuple[float, ...] = (0.8, 0.9, 1.0, 1.125, 1.2, 1.25)
+    minimum_window_onsets: int = 0
+    activity_target_onsets: int = 0
+    activity_weight: float = 0.0
+    velocity_mode: VelocityMode = "linear"
 
     def __post_init__(self) -> None:
         positive = {
@@ -64,6 +71,15 @@ class SimilarityConfig:
                 raise ValueError(f"{name} must be positive")
         if not self.tempo_ratios or any(ratio <= 0 for ratio in self.tempo_ratios):
             raise ValueError("tempo_ratios must contain positive values")
+        for name, value in {
+            "minimum_window_onsets": self.minimum_window_onsets,
+            "activity_target_onsets": self.activity_target_onsets,
+            "activity_weight": self.activity_weight,
+        }.items():
+            if value < 0:
+                raise ValueError(f"{name} must be non-negative")
+        if self.velocity_mode not in {"linear", "binary", "sqrt"}:
+            raise ValueError("velocity_mode must be linear, binary, or sqrt")
         for name, value in {
             "cell_threshold": self.cell_threshold,
             "match_threshold": self.match_threshold,
@@ -160,11 +176,14 @@ def build_window_vectors(
     window_seconds: float,
     hop_seconds: float,
     frame_seconds: float,
+    velocity_mode: VelocityMode = "linear",
 ) -> WindowVectors:
     """Build sustain/onset pitch-class tensors for overlapping time windows."""
 
     if window_seconds <= 0 or hop_seconds <= 0 or frame_seconds <= 0:
         raise ValueError("window, hop, and frame durations must be positive")
+    if velocity_mode not in {"linear", "binary", "sqrt"}:
+        raise ValueError("velocity_mode must be linear, binary, or sqrt")
     frame_count_float = window_seconds / frame_seconds
     frame_count = round(frame_count_float)
     if not np.isclose(frame_count_float, frame_count):
@@ -177,6 +196,10 @@ def build_window_vectors(
         if event.end <= event.start or not 0 <= event.pitch <= 127:
             continue
         velocity = float(np.clip(event.velocity, 0.0, 1.0))
+        if velocity_mode == "binary":
+            velocity = float(velocity > 0)
+        elif velocity_mode == "sqrt":
+            velocity = float(np.sqrt(velocity))
         pitch_class = event.pitch % 12
         for window_index, window_start in enumerate(starts):
             window_end = window_start + window_seconds
@@ -215,6 +238,10 @@ def build_window_vectors(
 def compute_similarity_matrix(
     query: WindowVectors,
     reference: WindowVectors,
+    *,
+    minimum_window_onsets: int = 0,
+    activity_target_onsets: int = 0,
+    activity_weight: float = 0.0,
 ) -> tuple[NDArray[np.float32], NDArray[np.int8]]:
     """Compare every window pair, retaining its best pitch transposition."""
 
@@ -232,6 +259,38 @@ def compute_similarity_matrix(
         where=reference_norms > 0,
     )
 
+    query_onsets = np.count_nonzero(query.values[:, :, 1, :], axis=(1, 2)).astype(
+        np.float32
+    )
+    reference_onsets = np.count_nonzero(
+        reference.values[:, :, 1, :], axis=(1, 2)
+    ).astype(np.float32)
+    eligible = (query_onsets[:, None] >= minimum_window_onsets) & (
+        reference_onsets[None, :] >= minimum_window_onsets
+    )
+
+    maximum_activity = np.maximum(query_onsets[:, None], reference_onsets[None, :])
+    activity_similarity = np.divide(
+        np.minimum(query_onsets[:, None], reference_onsets[None, :]),
+        maximum_activity,
+        out=np.zeros((query_count, reference_count), dtype=np.float32),
+        where=maximum_activity > 0,
+    )
+    if activity_target_onsets > 0:
+        query_confidence = np.clip(query_onsets / activity_target_onsets, 0.0, 1.0)
+        reference_confidence = np.clip(
+            reference_onsets / activity_target_onsets,
+            0.0,
+            1.0,
+        )
+        activity_similarity *= np.sqrt(
+            query_confidence[:, None] * reference_confidence[None, :]
+        )
+    if activity_weight > 0:
+        activity_factor = np.power(activity_similarity, activity_weight)
+    else:
+        activity_factor = np.ones_like(activity_similarity)
+
     for shift in range(12):
         shifted = np.roll(query.values, shift=shift, axis=-1).reshape(query_count, -1)
         query_norms = np.linalg.norm(shifted, axis=1, keepdims=True)
@@ -242,6 +301,8 @@ def compute_similarity_matrix(
             where=query_norms > 0,
         )
         scores = query_unit @ reference_unit.T
+        scores = np.clip(scores * activity_factor, 0.0, 1.0)
+        scores = np.where(eligible, scores, 0.0)
         improved = scores > best_scores
         best_scores[improved] = scores[improved]
         signed_shift = shift if shift <= 6 else shift - 12
@@ -319,6 +380,7 @@ def compare_events(
         window_seconds=config.window_seconds,
         hop_seconds=config.hop_seconds,
         frame_seconds=config.frame_seconds,
+        velocity_mode=config.velocity_mode,
     )
     reference_events = list(reference_events)
     candidates: list[Match] = []
@@ -331,8 +393,15 @@ def compare_events(
             window_seconds=reference_window,
             hop_seconds=config.hop_seconds * tempo_ratio,
             frame_seconds=config.frame_seconds * tempo_ratio,
+            velocity_mode=config.velocity_mode,
         )
-        scores, transpositions = compute_similarity_matrix(query, reference)
+        scores, transpositions = compute_similarity_matrix(
+            query,
+            reference,
+            minimum_window_onsets=config.minimum_window_onsets,
+            activity_target_onsets=config.activity_target_onsets,
+            activity_weight=config.activity_weight,
+        )
         best_cell_score = max(best_cell_score, float(np.max(scores, initial=0.0)))
 
         for run in _candidate_runs(scores, config.cell_threshold):

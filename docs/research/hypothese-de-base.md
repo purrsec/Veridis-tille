@@ -1,0 +1,316 @@
+---
+title: "Détection paire-à-paire de réutilisation musicale dans des masters audio"
+subtitle: "Note d’hypothèse, modèle de mesure et protocole de falsification"
+author: "Projet Veridis-tille"
+date: "Document de travail — 18 octobre 2026"
+lang: fr-FR
+---
+
+<div class="status-line"><span>POC exploratoire</span><span>Version 2</span><span>Décision assistée</span></div>
+
+## Résumé
+
+Ce travail étudie une question technique limitée : **étant donnés deux
+enregistrements audio finis, peut-on détecter et localiser une réutilisation
+musicale entre eux ?** Le système ne recherche pas un titre dans un catalogue
+et ne prononce pas un plagiat au sens juridique. Il calcule des indices de
+similarité suffisamment précis pour aider un expert à examiner une paire
+proposée : un morceau de référence et un morceau suspect.
+
+L’intuition initiale doit être formulée avec prudence. Un master est le résultat
+observable d’un mixage de sources musicales latentes. Une séparation de
+sources telle que Spleeter ne restitue pas les pistes de studio : elle en
+produit des **estimations**, susceptibles de contenir des fuites et des
+artefacts. De même, une transcription automatique fournit des événements de
+notes estimés, et non une partition vraie. La chaîne « séparation puis pitch »
+est donc une méthode candidate. Son utilité doit être démontrée par comparaison
+avec une méthode qui travaille directement sur le mix complet.
+
+L’hypothèse principale est falsifiable : si deux enregistrements partagent un
+passage musical issu d’une même matière source, des représentations robustes au
+timbre, à la transposition et à des variations modérées de tempo devraient
+produire une similarité locale plus élevée que pour des paires indépendantes,
+y compris des négatifs musicalement proches. Une deuxième hypothèse teste si
+la séparation en sources améliore réellement cette discrimination. Le
+protocole exige des familles de chansons disjointes entre apprentissage,
+validation et test, des négatifs difficiles, des ablations et un test final
+conservé intact.
+
+## 1. Objet scientifique et limites de l’inférence
+
+### 1.1 Ce qui est observé
+
+Le fichier distribué est un signal stéréo final, noté *x(t)*. On peut le
+représenter schématiquement comme une combinaison de sources latentes
+*s₁(t), …, sₖ(t)*, transformées par le mixage, les effets et le mastering :
+
+<div class="equation">x(t) = M(s₁(t), …, sₖ(t)) + ε(t)</div>
+
+La fonction *M* n’est ni connue ni, en général, inversible. Plusieurs ensembles
+de sources peuvent expliquer le même mix. Une séparation calcule donc
+*ŝₖ(t)*, une estimation conditionnée par son modèle et ses données
+d’entraînement. Elle ne permet pas d’affirmer que *ŝₖ = sₖ*.
+
+### 1.2 Ce que la méthode peut conclure
+
+Pour deux fichiers $A$ et $B$, la sortie recherchée est :
+
+- un score de similarité paire-à-paire ;
+- une décision au seuil, calibrée sur des données distinctes ;
+- un ou plusieurs couples d’intervalles temporels qui expliquent le score ;
+- les transformations estimées, par exemple transposition et rapport de tempo.
+
+Cette sortie constitue un **indice technique de similarité musicale**. Le mot
+« plagiat » désigne ici l’étiquette du jeu de données. Une qualification
+juridique demande d’autres éléments : originalité du matériau, accès à
+l’œuvre, importance qualitative de l’emprunt et contexte de création.
+
+### 1.3 Ce que l’on sait sur les données génératives
+
+Suno déclare entraîner ses modèles sur des dizaines de millions de fichiers
+audio musicaux publics et leurs métadonnées, ainsi que sur certaines données
+post-entraînement. Cette publication établit l’usage de fichiers audio, mais
+elle ne documente ni leur statut exact de master, ni l’éventuelle présence de
+stems, ni l’architecture et les représentations internes du modèle [1].
+
+L’entraînement sur des fichiers audio complets **n’implique pas** qu’une sortie
+générée contienne une piste source récupérable. Un modèle peut apprendre des
+régularités générales, mémoriser certains fragments, les transformer, ou
+combiner plusieurs influences. La persistance d’un motif identifiable dans une
+sortie est précisément la question empirique ; elle ne doit pas servir de
+prémisse à la démonstration.
+
+## 2. Hypothèses falsifiables
+
+<div class="hypothesis null">
+<strong>H₀ — hypothèse nulle.</strong> À difficulté musicale comparable, les
+scores des paires liées et indépendantes suivent la même distribution. Les
+performances observées sur le petit corpus proviennent du hasard, d’artefacts
+de génération, d’un réglage excessif ou de variables parasites.
+</div>
+
+<div class="hypothesis">
+<strong>H₁ — persistance d’un motif local.</strong> Une paire liée contient au
+moins un passage dont la structure de hauteurs et/ou d’attaques reste plus
+similaire que celle de paires indépendantes, après compensation d’une
+transposition et d’une variation modérée de tempo.
+</div>
+
+<div class="hypothesis">
+<strong>H₂ — valeur ajoutée de la séparation.</strong> Les représentations
+calculées sur des sources estimées améliorent la discrimination hors
+échantillon par rapport aux mêmes familles d’indices calculées sur le mix
+complet. Si elles n’apportent aucun gain stable, la séparation n’est pas
+justifiée pour ce POC.
+</div>
+
+<div class="hypothesis">
+<strong>H₃ — complémentarité.</strong> Les erreurs de la transcription MIDI et
+des descripteurs audio continus ne sont pas totalement corrélées. Leur fusion,
+réglée sans voir le test, améliore le compromis précision–rappel sans accroître
+de manière disproportionnée les faux positifs.
+</div>
+
+Ces hypothèses ne prétendent pas déduire le mécanisme interne du générateur.
+Elles testent uniquement une relation mesurable entre deux signaux de sortie.
+
+## 3. Modèle de mesure
+
+<div class="flow-diagram">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 360" role="img" aria-label="Chaîne de mesure distinguant la relation musicale latente, les deux masters observés, les deux branches de représentation, l’alignement local et la décision calibrée.">
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="#607987"/></marker></defs>
+  <rect x="350" y="8" width="360" height="50" rx="9" fill="#fff4dc" stroke="#d39a2c" stroke-width="2"/>
+  <text x="530" y="30" text-anchor="middle" font-family="Noto Sans" font-size="15" font-weight="700" fill="#634b1c">Relation musicale latente éventuelle</text><text x="530" y="49" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#634b1c">inconnue au système</text>
+  <path d="M440 58 L300 92" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M620 58 L760 92" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="175" y="94" width="250" height="55" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/><rect x="635" y="94" width="250" height="55" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/>
+  <text x="300" y="118" text-anchor="middle" font-family="Noto Sans" font-size="15" font-weight="700" fill="#173b57">Master A observé</text><text x="300" y="138" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">référence proposée</text>
+  <text x="760" y="118" text-anchor="middle" font-family="Noto Sans" font-size="15" font-weight="700" fill="#173b57">Master B observé</text><text x="760" y="138" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">enregistrement suspect</text>
+  <path d="M300 149 V174" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M760 149 V174" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="72" y="178" width="400" height="72" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/><rect x="588" y="178" width="400" height="72" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/>
+  <text x="272" y="202" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#173b57">Deux représentations concurrentes</text><text x="272" y="223" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">mix → chroma / attaques</text><text x="272" y="241" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">sources estimées → notes / intervalles</text>
+  <text x="788" y="202" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#173b57">Deux représentations concurrentes</text><text x="788" y="223" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">mix → chroma / attaques</text><text x="788" y="241" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">sources estimées → notes / intervalles</text>
+  <path d="M472 214 H510 V272" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M588 214 H550 V272" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="365" y="276" width="330" height="48" rx="9" fill="#173b57" stroke="#173b57" stroke-width="2"/><text x="530" y="297" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#fff">Alignement local et score</text><text x="530" y="316" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#e7f0f4">transposition · tempo · continuité</text>
+  <path d="M695 300 H770" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><rect x="780" y="276" width="235" height="48" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/><text x="897" y="297" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#176b68">Décision calibrée</text><text x="897" y="316" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">+ passages candidats</text>
+  <text x="54" y="347" font-family="Noto Sans" font-size="11" fill="#687781">Chaque transformation peut supprimer de l’information ou créer un artefact : elle doit être évaluée par ablation.</text>
+</svg>
+</div>
+
+### 3.1 Représentations candidates
+
+| Branche | Mesure | Invariance recherchée | Risque principal |
+| --- | --- | --- | --- |
+| Mix complet | chroma à 12 classes, énergie d’attaque | timbre, octave, transposition | accords banals et tonalité commune |
+| Sources estimées | activité de notes, vélocité, intervalles | timbre, gain, transposition | erreurs Spleeter puis Basic Pitch |
+| Alignement temporel | fenêtres locales, rapports de tempo | décalage et tempo modéré | maximum fort obtenu par hasard |
+| Fusion | combinaison de scores complémentaires | type de transformation inconnu | surapprentissage des seuils |
+
+Spleeter fournit des modèles pré-entraînés de séparation à deux, quatre ou cinq
+stems. Son article décrit des masques spectraux estimés par U-Net et propose la
+séparation comme prétraitement possible pour la transcription, l’extraction de
+mélodie et la détection de reprises [2]. Basic Pitch est un modèle de
+transcription polyphonique, indépendant de l’instrument, qui estime notamment
+les attaques, le multipitch et les activations de notes [3]. Ces travaux
+justifient la faisabilité technique des mesures ; ils ne prouvent pas H₂ sur
+notre corpus.
+
+Le chroma regroupe l’énergie spectrale dans les douze classes de hauteur en
+repliant les octaves. Cette représentation a déjà été employée pour comparer
+des versions d’un même morceau malgré des différences d’instrumentation et de
+tonalité, avec alignement temporel et examen des douze transpositions [4]. Elle
+constitue donc un contrôle direct sur le mix complet.
+
+### 3.2 Variable cible
+
+L’unité statistique est la **paire de morceaux**, et l’unité d’indépendance est
+la **famille de chanson**. Une paire positive relie un original documenté à une
+version dérivée. Une paire négative relie deux familles indépendantes. Les
+évaluations répétées d’une même paire dans plusieurs folds ne sont pas huit
+nouveaux morceaux : elles mesurent la stabilité du réglage.
+
+## 4. Protocole expérimental
+
+### 4.1 Constitution des données
+
+1. Définir les paires et leur provenance avant le calcul des scores.
+2. Grouper un original et toutes ses variantes dans une même famille.
+3. Séparer les familles entre apprentissage, validation et test ; aucun fichier
+   audio ne doit apparaître dans deux ensembles.
+4. Inclure des négatifs faciles et des **négatifs difficiles** partageant genre,
+   tonalité, tempo, progression harmonique, époque ou timbres.
+5. Documenter, lorsque c’est possible, les intervalles réellement repris afin
+   d’évaluer la localisation, pas seulement la décision globale.
+
+Avec seulement huit familles, le protocole actuel écarte deux familles à la
+fois et règle les paramètres sur les six restantes. Il convient à
+l’exploration et à l’élimination d’idées faibles. Il ne remplace pas un jeu de
+test indépendant.
+
+### 4.2 Comparaisons nécessaires
+
+| Expérience | Question isolée | Comparaison décisive |
+| --- | --- | --- |
+| A — mix complet | existe-t-il un signal sans séparation ? | chroma du mix contre H₀ |
+| B — ablation Spleeter | la séparation apporte-t-elle de l’information ? | mix seul contre stems seuls, mêmes folds |
+| C — ablation de transcription | le MIDI aide-t-il malgré ses erreurs ? | chroma de stems contre notes Basic Pitch |
+| D — invariances | quel changement est réellement toléré ? | sans/avec transposition et rapports de tempo |
+| E — fusion | les indices sont-ils complémentaires ? | meilleur indice seul contre combinaison réglée en interne |
+| F — robustesse | le score capte-t-il autre chose que le style ? | négatifs difficiles et générateurs nouveaux |
+
+Les paramètres — taille de fenêtre, seuils, pondérations et règle de fusion —
+sont choisis uniquement sur le sous-ensemble d’apprentissage de chaque fold.
+Une fois le protocole arrêté et le corpus agrandi, ces paramètres sont figés et
+évalués une seule fois sur le test conservé à part.
+
+### 4.3 Mesures et incertitude
+
+La décision paire-à-paire est évaluée par la précision, le rappel, le F1, le
+taux de faux positifs et l’aire sous la courbe précision–rappel. La localisation
+demande une mesure séparée de recouvrement temporel. Les résultats doivent être
+rapportés par famille, accompagnés d’intervalles de confiance par bootstrap au
+niveau des familles lorsque le corpus sera assez grand.
+
+Le classement dans un catalogue peut rester un diagnostic, mais il ne mesure
+pas l’objectif principal. Être classé premier parmi huit candidats ne démontre
+pas qu’une paire dépasse un seuil fiable face à des morceaux inconnus.
+
+### 4.4 Critères de réfutation et de décision
+
+- **Rejeter H₁** si, sur un test indépendant avec négatifs difficiles, les
+  scores ne discriminent pas les classes au-delà de l’incertitude attendue.
+- **Rejeter H₂** si les stems n’améliorent pas de façon stable le mix complet,
+  ou si le gain disparaît sur de nouvelles familles ou un nouveau générateur.
+- **Rejeter H₃** si la fusion choisie en validation accroît surtout les faux
+  positifs ou si son gain ne se reproduit pas sur le test.
+- **Réviser la représentation** si les passages les mieux notés ne recouvrent
+  pas les passages annotés, même lorsque la décision globale est correcte.
+
+## 5. État des observations du POC
+
+Le corpus de travail comporte actuellement huit familles, chacune avec un
+original et un extrait généré. Les expériences ont testé une vectorisation MIDI
+par fenêtres, la vélocité, l’activité, les contours, la fusion de stems et un
+alignement local de séquences mélodiques.
+
+Le meilleur candidat exploratoire accepte une paire si la fusion synchronisée
+des stems `bass` et `other`, ou l’alignement exact des intervalles vocaux,
+dépasse son seuil appris dans le fold. Agrégée sur les 28 choix de deux familles
+tenues à l’écart, cette règle produit :
+
+<div class="metrics"><div><strong>0,800</strong><span>F1</span></div><div><strong>0,857</strong><span>précision</span></div><div><strong>0,750</strong><span>rappel</span></div><div><strong>7 / 56</strong><span>faux positifs</span></div></div>
+
+Ces 112 décisions ne sont pas 112 observations indépendantes : chaque paire
+positive est réévaluée sept fois avec des ensembles d’apprentissage différents.
+Le résultat décrit la stabilité du pipeline sur **huit familles seulement**.
+Il est utile pour choisir la prochaine ablation, mais sa précision numérique ne
+doit pas être présentée comme la performance attendue en production.
+
+Les résultats par famille montrent aussi une forte hétérogénéité. La fusion
+MIDI détecte Rasputin dans six folds sur sept ; l’ajout des intervalles vocaux
+récupère Brother Louie, mais peut perdre Daddy Cool selon les seuils choisis.
+Cette instabilité est compatible aussi bien avec un signal réel mais fragile
+qu’avec un réglage trop adapté au corpus.
+
+## 6. Contrôle réalisé sur le mix complet
+
+Un chromagramme à douze classes a été calculé directement sur chaque WAV
+master, sans Spleeter ni Basic Pitch. Des fenêtres de dix secondes ont été
+comparées sous les douze transpositions et six rapports de tempo. Le score le
+plus robuste de cette branche impose une continuité sur deux fenêtres voisines.
+
+Utilisé seul, ce contrôle obtient un F1 exploratoire de **0,679**, contre
+**0,777** pour la fusion MIDI synchronisée `bass` + `other`. Les scores chroma
+sont fortement comprimés et se recouvrent entre paires positives et négatives :
+le seuil est donc fragile. Cette comparaison ne permet pas encore d’attribuer
+l’écart à Spleeter, car elle change simultanément le signal d’entrée et la
+représentation — chroma spectral du mix d’un côté, stems puis MIDI de l’autre.
+Une comparaison chroma-sur-mix contre chroma-sur-stems reste nécessaire pour
+isoler l’effet de la séparation et tester strictement H₂.
+
+Le chroma fournit néanmoins une information complémentaire. Une règle choisie
+dans chaque fold, positive si la branche `bass` + `other` **ou** le chroma
+continu dépasse son seuil, obtient :
+
+<div class="metrics"><div><strong>0,847</strong><span>F1</span></div><div><strong>0,855</strong><span>précision</span></div><div><strong>0,839</strong><span>rappel</span></div><div><strong>8 / 56</strong><span>faux positifs</span></div></div>
+
+Elle détecte Rasputin dans six folds sur sept. Le gain global vient surtout de
+Mambo No. 5 et Daddy Cool, mais la règle perd Brother Louie dans ces folds.
+L’ajout d’une troisième branche vocale réduit le F1 à 0,836 ; elle n’est donc
+pas retenue. La fusion à deux branches devient le meilleur candidat du POC,
+sans constituer une estimation finale de performance.
+
+Une seconde ablation applique ensuite **le même chroma** au master et aux stems
+Spleeter. Avec la même continuité de trois fenêtres, le mix obtient un F1 de
+0,660 et un taux de faux positifs de 0,268. La fusion chroma synchronisée
+`bass` + `other` tombe à 0,614 et 0,411. H₂ n’est donc pas soutenue pour cette
+représentation : la séparation dégrade le chroma au lieu de l’améliorer. Le bon
+résultat du pipeline MIDI dépend plutôt de la transcription symbolique, ou de
+son interaction avec les stems, que de la séparation seule.
+
+## 7. Conclusion opérationnelle
+
+L’hypothèse défendable n’est pas que l’on peut « retrouver les pistes
+d’origine » d’un master. Elle est que certaines relations musicales locales
+peuvent rester mesurables entre deux enregistrements transformés, et que la
+séparation de sources pourrait — ou non — rendre ces relations plus faciles à
+détecter. Le protocole est construit pour départager ces possibilités par
+ablation, sur des familles inédites et avec des négatifs difficiles.
+
+À ce stade, le POC fournit un signal exploratoire, un meilleur candidat de
+fusion et des localisations temporelles. Il montre aussi que Spleeter n’aide
+pas toutes les représentations : son intérêt éventuel doit être établi pour
+chaque mesure. Le POC ne permet encore ni d’attribuer l’origine exacte d’un
+morceau généré, ni d’estimer une performance générale, ni de conclure
+juridiquement à un plagiat. L’étape décisive suivante est un corpus plus large,
+avec négatifs difficiles et test par familles conservé intact.
+
+## Références
+
+<div class="references" markdown="1">
+
+1. Suno, « [Suno — CA AB 2013 Disclosure](https://help.suno.com/en/articles/9709569) », mise à jour du 1er janvier 2026.
+2. R. Hennequin, A. Khlif, F. Voituret et M. Moussallam, « [Spleeter: a fast and efficient music source separation tool with pre-trained models](https://doi.org/10.21105/joss.02154) », *Journal of Open Source Software*, 5(50), 2154, 2020.
+3. R. M. Bittner et al., « [A Lightweight Instrument-Agnostic Model for Polyphonic Note Transcription and Multipitch Estimation](https://arxiv.org/abs/2203.09893) », *ICASSP*, 2022.
+4. D. P. W. Ellis et G. E. Poliner, « [Identifying ‘Cover Songs’ with Chroma Features and Dynamic Programming Beat Tracking](https://doi.org/10.1109/ICASSP.2007.367348) », *ICASSP*, 2007.
+
+</div>

@@ -1,0 +1,213 @@
+@page {
+  size: A4;
+  margin: 15mm 17mm 15mm 17mm;
+}
+
+body {
+  color: #20242c;
+  font-family: "Noto Sans", "Liberation Sans", sans-serif;
+  font-size: 9.2pt;
+  line-height: 1.34;
+  max-width: 170mm;
+  margin: 0 auto;
+}
+
+h1 {
+  color: #173b57;
+  font-size: 25pt;
+  line-height: 1.12;
+  margin: 0 0 8pt;
+}
+
+h2 {
+  color: #176b68;
+  font-size: 16pt;
+  line-height: 1.2;
+  margin: 16pt 0 6pt;
+  break-after: avoid;
+}
+
+h3 {
+  color: #173b57;
+  font-size: 12pt;
+  margin: 16pt 0 5pt;
+  break-after: avoid;
+}
+
+.status-line {
+  display: flex;
+  gap: 7pt;
+  margin: 11pt 0 18pt;
+}
+
+.status-line span {
+  background: #edf5f4;
+  border: 1px solid #9cc8c3;
+  border-radius: 10pt;
+  color: #176b68;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 3pt 8pt;
+  text-transform: uppercase;
+  letter-spacing: 0.35pt;
+}
+
+p, ul, ol, table, pre, blockquote {
+  margin-top: 0;
+  margin-bottom: 7pt;
+}
+
+blockquote {
+  background: #edf5f4;
+  border-left: 4px solid #2d8981;
+  margin: 16pt 0;
+  padding: 10pt 14pt;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.equation {
+  background: #f3f6f8;
+  border: 1px solid #c8d3da;
+  border-radius: 5pt;
+  color: #173b57;
+  font-family: "Noto Serif", "Liberation Serif", serif;
+  font-size: 13pt;
+  margin: 10pt auto 12pt;
+  padding: 9pt 14pt;
+  text-align: center;
+}
+
+.hypothesis {
+  background: #edf5f4;
+  border-left: 4px solid #2d8981;
+  margin: 9pt 0;
+  padding: 8pt 11pt;
+  break-inside: avoid;
+}
+
+.hypothesis.null {
+  background: #fff4dc;
+  border-left-color: #d39a2c;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6pt;
+  margin: 12pt 0;
+}
+
+.metrics div {
+  background: #173b57;
+  border-radius: 5pt;
+  color: #fff;
+  padding: 8pt 5pt;
+  text-align: center;
+}
+
+.metrics strong,
+.metrics span {
+  display: block;
+}
+
+.metrics strong {
+  font-size: 15pt;
+}
+
+.metrics span {
+  color: #dce9ef;
+  font-size: 8pt;
+  margin-top: 2pt;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 8.8pt;
+  width: 100%;
+}
+
+th {
+  background: #173b57;
+  color: #fff;
+  text-align: left;
+}
+
+th, td {
+  border: 1px solid #c8d3da;
+  padding: 5pt 7pt;
+  vertical-align: top;
+}
+
+tr:nth-child(even) td {
+  background: #f3f6f8;
+}
+
+.flow-diagram {
+  margin: 13pt 0;
+  width: 100%;
+}
+
+.flow-diagram svg {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.page-break {
+  break-before: page;
+  page-break-before: always;
+}
+
+pre {
+  background: #f1f4f6;
+  border: 1px solid #d5dee3;
+  border-radius: 4pt;
+  padding: 10pt;
+  white-space: pre-wrap;
+  font-family: "Liberation Mono", monospace;
+  font-size: 9pt;
+}
+
+code {
+  font-family: "Liberation Mono", monospace;
+  font-size: 0.92em;
+}
+
+a {
+  color: #176b68;
+  text-decoration: underline;
+}
+
+li {
+  margin-bottom: 3pt;
+}
+
+tbody tr {
+  break-inside: avoid;
+}
+
+.references {
+  font-size: 8.2pt;
+  line-height: 1.26;
+}
+
+.references ol {
+  column-count: 2;
+  column-gap: 16pt;
+  margin-left: 0;
+  padding-left: 16pt;
+}
+
+.references li {
+  break-inside: avoid;
+  margin-bottom: 2pt;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #c8d3da;
+  margin: 18pt 0;
+}
