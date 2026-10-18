@@ -6,7 +6,7 @@ date: "Document de travail — 18 octobre 2026"
 lang: fr-FR
 ---
 
-<div class="status-line"><span>POC exploratoire</span><span>Version 2</span><span>Décision assistée</span></div>
+<div class="status-line"><span>POC exploratoire</span><span>Version 3</span><span>Décision assistée</span></div>
 
 ## Résumé
 
@@ -53,7 +53,7 @@ d’entraînement. Elle ne permet pas d’affirmer que *ŝₖ = sₖ*.
 
 ### 1.2 Ce que la méthode peut conclure
 
-Pour deux fichiers $A$ et $B$, la sortie recherchée est :
+Pour deux fichiers *A* et *B*, la sortie recherchée est :
 
 - un score de similarité paire-à-paire ;
 - une décision au seuil, calibrée sur des données distinctes ;
@@ -117,26 +117,113 @@ Elles testent uniquement une relation mesurable entre deux signaux de sortie.
 ## 3. Modèle de mesure
 
 <div class="flow-diagram">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 360" role="img" aria-label="Chaîne de mesure distinguant la relation musicale latente, les deux masters observés, les deux branches de représentation, l’alignement local et la décision calibrée.">
-  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="#607987"/></marker></defs>
-  <rect x="350" y="8" width="360" height="50" rx="9" fill="#fff4dc" stroke="#d39a2c" stroke-width="2"/>
-  <text x="530" y="30" text-anchor="middle" font-family="Noto Sans" font-size="15" font-weight="700" fill="#634b1c">Relation musicale latente éventuelle</text><text x="530" y="49" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#634b1c">inconnue au système</text>
-  <path d="M440 58 L300 92" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M620 58 L760 92" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="175" y="94" width="250" height="55" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/><rect x="635" y="94" width="250" height="55" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/>
-  <text x="300" y="118" text-anchor="middle" font-family="Noto Sans" font-size="15" font-weight="700" fill="#173b57">Master A observé</text><text x="300" y="138" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">référence proposée</text>
-  <text x="760" y="118" text-anchor="middle" font-family="Noto Sans" font-size="15" font-weight="700" fill="#173b57">Master B observé</text><text x="760" y="138" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">enregistrement suspect</text>
-  <path d="M300 149 V174" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M760 149 V174" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="72" y="178" width="400" height="72" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/><rect x="588" y="178" width="400" height="72" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/>
-  <text x="272" y="202" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#173b57">Deux représentations concurrentes</text><text x="272" y="223" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">mix → chroma / attaques</text><text x="272" y="241" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">sources estimées → notes / intervalles</text>
-  <text x="788" y="202" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#173b57">Deux représentations concurrentes</text><text x="788" y="223" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">mix → chroma / attaques</text><text x="788" y="241" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">sources estimées → notes / intervalles</text>
-  <path d="M472 214 H510 V272" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M588 214 H550 V272" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="365" y="276" width="330" height="48" rx="9" fill="#173b57" stroke="#173b57" stroke-width="2"/><text x="530" y="297" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#fff">Alignement local et score</text><text x="530" y="316" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#e7f0f4">transposition · tempo · continuité</text>
-  <path d="M695 300 H770" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><rect x="780" y="276" width="235" height="48" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/><text x="897" y="297" text-anchor="middle" font-family="Noto Sans" font-size="14" font-weight="700" fill="#176b68">Décision calibrée</text><text x="897" y="316" text-anchor="middle" font-family="Noto Sans" font-size="12" fill="#405662">+ passages candidats</text>
-  <text x="54" y="347" font-family="Noto Sans" font-size="11" fill="#687781">Chaque transformation peut supprimer de l’information ou créer un artefact : elle doit être évaluée par ablation.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 570" role="img" aria-label="Processus complet : deux masters, branche chroma directe, branche Spleeter et Basic Pitch, fenêtrage, comparaison locale, invariances, calibration et verdict.">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="#607987"/></marker>
+    <style>.t{font-family:Noto Sans,sans-serif}.h{font-size:15px;font-weight:700;fill:#173b57}.s{font-size:12px;fill:#405662}.l{font-size:12px;fill:#e7f0f4}.w{fill:#fff}.n{font-size:12px;font-weight:700;fill:#fff}</style>
+  </defs>
+  <circle cx="38" cy="35" r="17" fill="#176b68"/><text x="38" y="40" text-anchor="middle" class="t n">1</text>
+  <rect x="70" y="8" width="390" height="56" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/>
+  <rect x="620" y="8" width="390" height="56" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/>
+  <text x="265" y="31" text-anchor="middle" class="t h">Master A — référence proposée</text><text x="265" y="51" text-anchor="middle" class="t s">WAV PCM 16 bits · stéréo · 44,1 kHz</text>
+  <text x="815" y="31" text-anchor="middle" class="t h">Master B — morceau suspect</text><text x="815" y="51" text-anchor="middle" class="t s">WAV PCM 16 bits · stéréo · 44,1 kHz</text>
+  <path d="M265 64 V77 H540" fill="none" stroke="#607987" stroke-width="2"/><path d="M815 64 V77 H540" fill="none" stroke="#607987" stroke-width="2"/>
+  <path d="M540 77 H297 V91" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M540 77 H807 V91" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="450" y="68" width="180" height="18" rx="8" fill="#fff"/><text x="540" y="81" text-anchor="middle" class="t" font-size="10" fill="#687781">traités séparément</text>
+  <circle cx="38" cy="133" r="17" fill="#176b68"/><text x="38" y="138" text-anchor="middle" class="t n">2</text>
+  <rect x="70" y="94" width="455" height="94" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/>
+  <text x="297" y="119" text-anchor="middle" class="t h">A et B — branche directe : mix complet</text>
+  <text x="297" y="142" text-anchor="middle" class="t s">mono d’analyse → STFT → énergie spectrale</text>
+  <text x="297" y="162" text-anchor="middle" class="t s">→ chroma : 12 classes de hauteur par trame</text>
+  <text x="297" y="181" text-anchor="middle" class="t" font-size="11" fill="#9a5f18">risque : tonalité ou accords banals</text>
+  <circle cx="572" cy="133" r="17" fill="#176b68"/><text x="572" y="138" text-anchor="middle" class="t n">3</text>
+  <rect x="605" y="94" width="405" height="94" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/>
+  <text x="807" y="119" text-anchor="middle" class="t h">A et B — branche symbolique : sources estimées</text>
+  <text x="807" y="142" text-anchor="middle" class="t s">Spleeter → voix · batterie · basse · piano · other</text>
+  <text x="807" y="162" text-anchor="middle" class="t s">Basic Pitch → début · fin · hauteur · vélocité</text>
+  <text x="807" y="181" text-anchor="middle" class="t" font-size="11" fill="#9a5f18">risques : fuites de stems + erreurs de notes</text>
+  <path d="M297 188 V216" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M807 188 V216" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <circle cx="38" cy="253" r="17" fill="#176b68"/><text x="38" y="258" text-anchor="middle" class="t n">4</text>
+  <rect x="70" y="219" width="940" height="68" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/>
+  <text x="540" y="244" text-anchor="middle" class="t h">Représentations temporelles comparables</text>
+  <text x="540" y="266" text-anchor="middle" class="t s">fenêtres de 10 s · pas de 2 s · trames de 0,5 s · sustain/onset pondérés par vélocité · intervalles mélodiques</text>
+  <path d="M540 287 V315" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <circle cx="38" cy="351" r="17" fill="#176b68"/><text x="38" y="356" text-anchor="middle" class="t n">5</text>
+  <rect x="70" y="318" width="455" height="75" rx="9" fill="#f3f6f8" stroke="#9eafb9" stroke-width="2"/>
+  <text x="297" y="342" text-anchor="middle" class="t h">Comparaison locale A × B</text>
+  <text x="297" y="363" text-anchor="middle" class="t s">une cellule = similarité entre deux fenêtres datées</text>
+  <text x="297" y="382" text-anchor="middle" class="t s">matrices chroma, bass, other et voix</text>
+  <rect x="605" y="318" width="405" height="75" rx="9" fill="#fff4dc" stroke="#d39a2c" stroke-width="2"/>
+  <text x="807" y="342" text-anchor="middle" class="t h">Invariances testées</text>
+  <text x="807" y="363" text-anchor="middle" class="t s">12 transpositions · tempo 0,80 à 1,25</text>
+  <text x="807" y="382" text-anchor="middle" class="t s">continuité diagonale · alignement local</text>
+  <path d="M525 355 H601" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/><path d="M807 393 V421" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <circle cx="38" cy="458" r="17" fill="#176b68"/><text x="38" y="463" text-anchor="middle" class="t n">6</text>
+  <rect x="70" y="424" width="285" height="70" rx="9" fill="#173b57" stroke="#173b57" stroke-width="2"/>
+  <text x="212" y="450" text-anchor="middle" class="t h w">Scores localisés</text><text x="212" y="472" text-anchor="middle" class="t l">mix chroma · bass/other · voix</text>
+  <path d="M355 459 H395" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="400" y="424" width="285" height="70" rx="9" fill="#173b57" stroke="#173b57" stroke-width="2"/>
+  <text x="542" y="450" text-anchor="middle" class="t h w">Calibration imbriquée</text><text x="542" y="472" text-anchor="middle" class="t l">seuils appris sur les familles train</text>
+  <path d="M685 459 H725" fill="none" stroke="#607987" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="730" y="424" width="280" height="70" rx="9" fill="#edf5f4" stroke="#2d8981" stroke-width="2"/>
+  <text x="870" y="450" text-anchor="middle" class="t h">Verdict paire-à-paire</text><text x="870" y="472" text-anchor="middle" class="t s">score + passages + transformations</text>
+  <circle cx="38" cy="535" r="17" fill="#176b68"/><text x="38" y="540" text-anchor="middle" class="t n">7</text>
+  <rect x="70" y="512" width="940" height="46" rx="9" fill="#fff" stroke="#9eafb9" stroke-width="2"/>
+  <text x="540" y="532" text-anchor="middle" class="t h">Évaluation par familles jamais vues dans le fold</text>
+  <text x="540" y="550" text-anchor="middle" class="t s">précision · rappel · F1 · faux positifs · stabilité par chanson · localisation</text>
 </svg>
 </div>
 
-### 3.1 Représentations candidates
+### 3.1 Du fichier audio au verdict
+
+**1 — Entrées et provenance.** Le système reçoit exactement deux masters : un
+enregistrement de référence proposé et un enregistrement suspect. Ils sont
+convertis sans modification musicale en WAV d’analyse homogènes. Les extraits
+IA du corpus actuel proviennent de la page d’échantillons publiée par GEMA dans
+le cadre de son action contre Suno [2]. Les liens vers les sources audio et les
+logiciels sont consignés dans `CREDITS.md` [3].
+
+**2 — Branche directe.** Chaque master est ramené en mono uniquement pour le
+calcul. Une transformée de Fourier à court terme mesure son énergie spectrale,
+puis les fréquences sont repliées dans douze classes de hauteur : do, do♯, …,
+si, indépendamment de l’octave. On obtient un chromagramme, c’est-à-dire une
+suite de douze valeurs au cours du temps. Cette branche conserve le contexte du
+mix, mais peut confondre une reprise avec une tonalité ou des accords courants.
+
+**3 — Branche symbolique.** Spleeter [4, 5] estime cinq familles de sources pour
+chacun des deux masters. Basic Pitch [6, 7] transcrit chaque stem en événements
+décrits par un début, une fin, une hauteur MIDI et une vélocité. La
+vectorisation construit ensuite deux canaux par classe de hauteur : la note
+tenue (*sustain*) et son attaque (*onset*), pondérées par la vélocité. Pour la
+voix, une seconde représentation conserve l’ordre des intervalles entre notes.
+Les erreurs de séparation et de transcription peuvent ici se cumuler.
+
+**4 — Fenêtrage.** Les suites sont découpées en fenêtres locales de dix
+secondes, espacées de deux secondes et décrites par des trames de 500 ms. Une
+reprise courte peut ainsi être détectée sans exiger que les morceaux entiers
+aient la même durée ou la même structure.
+
+**5 — Matrice de comparaison.** Chaque fenêtre de A est comparée à chaque
+fenêtre de B. Une cellule de la matrice contient donc un score et deux positions
+temporelles précises. La comparaison est répétée pour les douze transpositions
+et six rapports de tempo, de 0,80 à 1,25. Les maxima isolés sont fragiles ; le
+pipeline favorise plusieurs cellules cohérentes sur une diagonale ou un
+alignement local continu de notes.
+
+**6 — Fusion et calibration.** Les branches produisent des scores distincts :
+chroma du mix, similarité synchronisée `bass` + `other`, et intervalles vocaux.
+Les seuils et la règle de fusion sont choisis uniquement sur les familles du
+fold d’apprentissage. La règle candidate actuelle déclenche si le score MIDI
+`bass` + `other` **ou** le chroma continu dépasse son seuil. Elle retourne aussi
+les passages, la transposition et le rapport de tempo qui soutiennent le score.
+
+**7 — Évaluation.** Deux familles complètes sont retirées à chaque fold. Les
+seuils sont réglés sur les six autres, puis évalués sur les deux familles
+inédites. Cela empêche qu’un même morceau serve simultanément au réglage et à la
+mesure, sans rendre les 112 décisions indépendantes : le corpus ne contient
+toujours que huit familles.
+
+### 3.2 Représentations candidates
 
 | Branche | Mesure | Invariance recherchée | Risque principal |
 | --- | --- | --- | --- |
@@ -148,19 +235,19 @@ Elles testent uniquement une relation mesurable entre deux signaux de sortie.
 Spleeter fournit des modèles pré-entraînés de séparation à deux, quatre ou cinq
 stems. Son article décrit des masques spectraux estimés par U-Net et propose la
 séparation comme prétraitement possible pour la transcription, l’extraction de
-mélodie et la détection de reprises [2]. Basic Pitch est un modèle de
+mélodie et la détection de reprises [5]. Basic Pitch est un modèle de
 transcription polyphonique, indépendant de l’instrument, qui estime notamment
-les attaques, le multipitch et les activations de notes [3]. Ces travaux
+les attaques, le multipitch et les activations de notes [7]. Ces travaux
 justifient la faisabilité technique des mesures ; ils ne prouvent pas H₂ sur
 notre corpus.
 
 Le chroma regroupe l’énergie spectrale dans les douze classes de hauteur en
 repliant les octaves. Cette représentation a déjà été employée pour comparer
 des versions d’un même morceau malgré des différences d’instrumentation et de
-tonalité, avec alignement temporel et examen des douze transpositions [4]. Elle
+tonalité, avec alignement temporel et examen des douze transpositions [8]. Elle
 constitue donc un contrôle direct sur le mix complet.
 
-### 3.2 Variable cible
+### 3.3 Variable cible
 
 L’unité statistique est la **paire de morceaux**, et l’unité d’indépendance est
 la **famille de chanson**. Une paire positive relie un original documenté à une
@@ -227,8 +314,8 @@ pas qu’une paire dépasse un seuil fiable face à des morceaux inconnus.
 
 ## 5. État des observations du POC
 
-Le corpus de travail comporte actuellement huit familles, chacune avec un
-original et un extrait généré. Les expériences ont testé une vectorisation MIDI
+Le corpus de travail reprend huit comparaisons documentées par GEMA, chacune
+avec un original et un extrait généré [2, 3]. Les expériences ont testé une vectorisation MIDI
 par fenêtres, la vélocité, l’activité, les contours, la fusion de stems et un
 alignement local de séquences mélodiques.
 
@@ -287,6 +374,8 @@ représentation : la séparation dégrade le chroma au lieu de l’améliorer. L
 résultat du pipeline MIDI dépend plutôt de la transcription symbolique, ou de
 son interaction avec les stems, que de la séparation seule.
 
+<div class="page-break"></div>
+
 ## 7. Conclusion opérationnelle
 
 L’hypothèse défendable n’est pas que l’on peut « retrouver les pistes
@@ -309,8 +398,12 @@ avec négatifs difficiles et test par familles conservé intact.
 <div class="references" markdown="1">
 
 1. Suno, « [Suno — CA AB 2013 Disclosure](https://help.suno.com/en/articles/9709569) », mise à jour du 1er janvier 2026.
-2. R. Hennequin, A. Khlif, F. Voituret et M. Moussallam, « [Spleeter: a fast and efficient music source separation tool with pre-trained models](https://doi.org/10.21105/joss.02154) », *Journal of Open Source Software*, 5(50), 2154, 2020.
-3. R. M. Bittner et al., « [A Lightweight Instrument-Agnostic Model for Polyphonic Note Transcription and Multipitch Estimation](https://arxiv.org/abs/2203.09893) », *ICASSP*, 2022.
-4. D. P. W. Ellis et G. E. Poliner, « [Identifying ‘Cover Songs’ with Chroma Features and Dynamic Programming Beat Tracking](https://doi.org/10.1109/ICASSP.2007.367348) », *ICASSP*, 2007.
+2. GEMA, « [Audio samples: How Suno copies famous songs](https://www.gema.de/en/news/ai-and-music/ai-lawsuit/audio-samples-suno) », échantillons audio et leadsheets utilisés pour constituer le corpus du POC, consulté le 18 octobre 2026.
+3. Projet Veridis-tille, « [CREDITS.md — Credits and sources](https://github.com/purrsec/Veridis-tille/blob/main/CREDITS.md) », provenance détaillée des fichiers audio et logiciels du projet.
+4. Deezer Research, « [Spleeter — source separation library](https://github.com/deezer/spleeter) », logiciel libre de séparation utilisé pour produire les cinq stems.
+5. R. Hennequin, A. Khlif, F. Voituret et M. Moussallam, « [Spleeter: a fast and efficient music source separation tool with pre-trained models](https://doi.org/10.21105/joss.02154) », *Journal of Open Source Software*, 5(50), 2154, 2020.
+6. Spotify, « [Basic Pitch — Audio-to-MIDI converter](https://github.com/spotify/basic-pitch) », logiciel libre de transcription utilisé pour produire les événements MIDI et CSV.
+7. R. M. Bittner et al., « [A Lightweight Instrument-Agnostic Model for Polyphonic Note Transcription and Multipitch Estimation](https://arxiv.org/abs/2203.09893) », *ICASSP*, 2022.
+8. D. P. W. Ellis et G. E. Poliner, « [Identifying ‘Cover Songs’ with Chroma Features and Dynamic Programming Beat Tracking](https://doi.org/10.1109/ICASSP.2007.367348) », *ICASSP*, 2007.
 
 </div>

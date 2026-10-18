@@ -2,7 +2,7 @@
 
 ## Audio sources
 
-- [GEMA: Audio samples — How Suno copies famous songs](https://www.gema.de/en/news/ai-and-music/ai-lawsuit/audio-samples-suno)
+- [GEMA: Audio samples — How Suno copies famous songs](https://www.gema.de/en/news/ai-and-music/ai-lawsuit/audio-samples-suno) — source of the eight AI-generated excerpts used in the POC dataset and of the documented original/AI comparisons
 - [Modern Talking — Brother Louie (Official Video)](https://www.youtube.com/watch?v=Lp2qcCrdBLA)
 - [Modern Talking — Cheri Cheri Lady (Official Video)](https://www.youtube.com/watch?v=eNvUS-6PTbs)
 - [Lou Bega — Mambo No. 5 (lyrics video)](https://www.youtube.com/watch?v=CiaMTs7dI4E)
